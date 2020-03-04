@@ -9,6 +9,7 @@ namespace ThriftShop.Models
   {
 
     public DbSet<Item> Items { get; set; }
+    public DbSet<Location> Locations { get; set; }
 
     private string ConvertPostConnectionToConnectionString(string connection)
     {
