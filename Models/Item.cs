@@ -12,11 +12,8 @@ namespace ThriftShop.Models
     public double Price { get; set; }
     public DateTime DateOrdered { get; set; } = DateTime.Now;
 
-    public int ItemId { get; set; }
-    public Item Items { get; set; }
-
-
-
+    public int? locationId { get; set; }
+    public Location Location { get; set; }
 
   }
 }

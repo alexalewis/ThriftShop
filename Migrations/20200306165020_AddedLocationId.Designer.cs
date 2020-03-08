@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ThriftShop.Models;
@@ -9,9 +10,10 @@ using ThriftShop.Models;
 namespace ThriftShop.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20200306165020_AddedLocationId")]
+    partial class AddedLocationId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +34,9 @@ namespace ThriftShop.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -44,12 +49,9 @@ namespace ThriftShop.Migrations
                     b.Property<string>("SKU")
                         .HasColumnType("text");
 
-                    b.Property<int?>("locationId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("locationId");
+                    b.HasIndex("LocationId");
 
                     b.ToTable("Items");
                 });
@@ -79,7 +81,7 @@ namespace ThriftShop.Migrations
                 {
                     b.HasOne("ThriftShop.Models.Location", "Location")
                         .WithMany("Items")
-                        .HasForeignKey("locationId");
+                        .HasForeignKey("LocationId");
                 });
 #pragma warning restore 612, 618
         }

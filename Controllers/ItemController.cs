@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ThriftShop.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ThriftShop.Controllers
 {
@@ -14,26 +15,41 @@ namespace ThriftShop.Controllers
   {
     public DatabaseContext db { get; set; } = new DatabaseContext();
 
-    [HttpGet("items")]
-    public List<Item> GetAllItems()
+    [HttpGet("location/{locationId}")]
+    public async Task<ActionResult<List<Item>>> GetAllItemsByLocation(int locationId)
     {
-      var item = db.Items.OrderBy(i => i.Name);
-      return item.ToList();
+      var allItems = db.Items.Where(a => a.locationId == locationId);
+      if (allItems == null)
+      {
+        return NotFound();
+      }
+      else
+      {
+        return await allItems.ToListAsync();
+      }
+
     }
 
-    [HttpGet("{id}")]
-    public Item GetOneItem(int id)
+
+    [HttpGet("{id}/{locationId}")]
+    public async Task<ActionResult<Item>> GetOneItem(int id, int locationId)
     {
-      var oneItem = db.Items.FirstOrDefault(i => i.Id == id);
-      return oneItem;
+      var item = await db.Items.FirstOrDefaultAsync(i => i.Id == id && i.locationId == locationId);
+      if (item == null)
+      {
+        return NotFound();
+      }
+      return Ok(item);
     }
 
-    [HttpPost]
-    public Item AddItem(Item item)
+
+    [HttpPost("{locationId}")]
+    public async Task<ActionResult<Item>> AddItemByLocation(int locationId, Item item)
     {
-      db.Items.Add(item);
-      db.SaveChanges();
-      return item;
+      item.locationId = locationId;
+      await db.Items.AddAsync(item);
+      await db.SaveChangesAsync();
+      return Ok(item);
     }
 
     [HttpPut("{id}/update")]
@@ -44,24 +60,39 @@ namespace ThriftShop.Controllers
       db.SaveChanges();
       return whichItem;
     }
-    [HttpDelete]
-    public ActionResult DeleteOne(int id)
+
+    [HttpPut("{id}/{locationId}")]
+    public async Task<ActionResult<Item>> UpdateItem(int id, int locationId, Item newData)
     {
-      var delete = db.Items.FirstOrDefault(p => p.Id == id);
-      if (delete == null)
+      newData.Id = id;
+      newData.locationId = locationId;
+      db.Entry(newData).State = EntityState.Modified;
+      await db.SaveChangesAsync();
+      return Ok(newData);
+    }
+
+    [HttpDelete("{id}/{locationId}")]
+    public async Task<ActionResult> DeleteItem(int id, int locationId)
+    {
+      var item = await db.Items.FirstOrDefaultAsync(i => i.Id == id && i.locationId == locationId);
+      if (item == null)
       {
         return NotFound();
       }
-      db.Items.Remove(delete);
-      db.SaveChanges();
+      db.Items.Remove(item);
+      await db.SaveChangesAsync();
       return Ok();
     }
 
-    [HttpGet("SKU/{SKU}")]
-    public Item GetBySKU(string SKU)
+    [HttpGet("sku/{sku}")]
+    public async Task<ActionResult<Item>> GetOneItemSKU(string sku)
     {
-      var itemBySKU = db.Items.FirstOrDefault(i => i.SKU == SKU);
-      return itemBySKU;
+      var item = await db.Items.Where(i => i.SKU == sku).ToListAsync();
+      if (item == null)
+      {
+        return NotFound();
+      }
+      return Ok(item);
     }
 
     [HttpGet("outofstock")]
@@ -76,6 +107,18 @@ namespace ThriftShop.Controllers
       return noStock.ToList();
     }
 
-  }
+    [HttpGet("outofstock/{locationId}")]
+    public async Task<ActionResult<Item>> GetOutOfStockLocation(int NumberInStock, int locationId)
+    {
+      var item = await db.Items.Where(i => i.NumberInStock == 0 && i.locationId == locationId).ToListAsync();
+      if (item == null)
+      {
+        return NotFound();
+      }
+      return Ok(item);
+    }
 
+  }
 }
+
+

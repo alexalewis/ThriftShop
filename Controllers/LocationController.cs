@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ThriftShop.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ThriftShop.Controllers
 {
